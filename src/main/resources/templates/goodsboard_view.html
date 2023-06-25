@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"  xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>고물섬 - 판매 게시판 상세보기</title>
+  <!-- Favicon-->
+  <link rel="icon" type="image/x-icon" th:href="@{/main/assets/favicon.ico}" />
+  <!-- Bootstrap icons-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Core theme CSS (includes Bootstrap)-->
+  <link th:href="@{/goodsboard_view/css/goodsboard_view_styles.css}" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+  <!-- 구글 폰트 적용 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<!-- Navigation ------------------------------------------------------------------------------------------------------------------>
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" style="background-color: #DBA36A;">
+  <div class="container px-4 px-lg-5">
+    <img id="logo-img" th:src="@{/main/img/logo.png}">    <!-- 로고 이미지 -->
+    <a class="navbar-brand" th:href="@{/main}">고물섬</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+        <li class="nav-item"><a class="nav-link" th:href="@{/goodsboard_list?category=0}">판매 게시판</a></li>    <!-- 경로를 설정해서 판매게시판으로 이동 가능 -->
+        <li class="nav-item"><a class="nav-link" th:href="@{/board_list?category=1}">자유 게시판</a></li>       <!-- 경로를 설정해서 자유게시판으로 이동 가능 -->
+      </ul>
+
+      <div class="d-flex" style="height: 38px;">
+        <a sec:authorize="isAnonymous()" th:href="@{/login_cat}">
+          <button class="btn btn-outline-dark" type="button">
+            회원가입/로그인
+          </button>
+        </a>
+
+        <!-- 로그인 한 아이디 출력 코드 -->
+        <div sec:authorize="isAuthenticated()">
+          <div id="userid" class="login-name" style="margin-right: 5px; padding-top: 6px; float:left;" onclick="return false;" sec:authentication="name"></div>
+          <p class="login-name" style="margin-right: 5px; padding-top: 6px; float:left;" onclick="return false;">님 환영합니다.</p>
+        </div>
+
+        <a sec:authorize="isAuthenticated()" th:href="@{/logout}">
+          <button class="btn btn-outline-dark login-out-btn" type="button">
+            로그아웃
+          </button>
+        </a>
+
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- Navigation -->
+
+<!--------- 메인 영역  ------------------------------------------------------------------------------------------------------------------>
+<section class="py-5" style="background-color: #FFE8C6;">
+
+  <div class="container px-4 px-lg-5 my-5">
+
+    <a th:href="@{/goodsboard_list?category=0}">
+      <button class="btn btn-outline-dark" style="margin-bottom: 20px;" type="button">
+        이전으로
+      </button>
+    </a>
+
+    <!--------------------------- 상품 이미지 슬라이드 --------------------------------------------------------------------------------------->
+
+    <div class="row gx-4 gx-lg-5 align-items-center">
+      <div class="col-md-6">
+
+        <div id="demo" class="carousel slide" data-bs-ride="carousel">
+
+          <!-- The slideshow/carousel -->
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img th:src="|/display?fileName=${dto.imgDTOList[0].getImageURL()}|" class="d-block" style="width:100%">
+            </div>
+            <div class="carousel-item" th:each="dto, i : ${dto.imgDTOList}" th:if="${i.index} > 0">
+              <img th:src="|/display?fileName=${dto.getImageURL()}|" class="d-block" style="width:100%">
+            </div>
+          </div>
+
+          <!-- Left and right controls/icons -->
+          <button class="carousel-control-prev" type="button" data-bs-target="#demo" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#demo" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group" style="padding-bottom: 20px;">
+          <h1 class="display-5 fw-bolder" th:text="${dto.title}"></h1>
+        </div>
+
+        <div class="fs-5 mb-5">
+          가격 : <span th:text="${dto.price}"></span>원
+        </div>
+
+        <!-------------------- 상품 이미지 슬라이드 -------------------->
+        <div class="text-box">
+          <p class="lead" th:text="${dto.content}"></p>
+        </div>
+
+        <div class="d-flex register" style="float: right;">
+
+          <a th:href="@{/goodsboard_modify(bno = ${dto.bno}, page=${requestDTO.page}, type=${requestDTO.type}, keyword=${requestDTO.keyword})}"
+             th:if="${#authentication.principal.username} == ${dto.writer}">
+            <button class="btn btn-outline-dark" type="button">
+              수정 / 삭제
+            </button>
+          </a>
+
+        </div>
+      </div>
+
+      <!---------------------------------------------- 리뷰 작성하는 곳 ---------------------------------------------->
+      <div style="margin-top: 10px;">
+        <button type="button" class="btn btn-outline-dark addReviewBtn" sec:authorize="isAuthenticated()">댓글 등록</button>
+      </div>
+
+      <div class="container" style="height: 200px; overflow-x: hidden; overflow-y: scroll;">
+        <div class="list-group reviewList">
+
+        </div>
+      </div>
+      <!---------------------------------------------- 리뷰 작성하는 곳 ---------------------------------------------->
+
+
+      <!-- 리뷰 작성 모달창 ----------------------------------------------------------------------------------------------->
+      <div class="reviewModal modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">게시글 댓글</h5>
+
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>작성자</label>
+                <input class="form-control" id="reviewer" name="writer" th:value="${#authentication.principal.username}" readonly>
+              </div>
+              <div class="form-group">
+                <label>댓글</label>
+                <input type="text" class="form-control" name="text" placeholder="리뷰를 작성하세요.">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+              <button type="button" class="btn btn-primary reviewSaveBtn">등록</button>
+              <button type="button" class="btn btn-warning modifyBtn">수정</button>
+              <button type="button" class="btn btn-danger removeBtn">삭제</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 리뷰 작성 모달창 -->
+    </div>
+  </div>
+</section>
+
+<!-- Footer ---------------------------------------------------------------------------------------------------------------------------------->
+<footer class="py-5 bg-dark">
+  <div class="container">
+    <h5 class="m-0 text-center text-white">고양이가 물어다주는 보물섬</h5>
+    <br>
+    <p class="m-0 text-center text-white">Copyright &copy; Your Website 2022</p>
+  </div>
+</footer>
+
+<!-- Bootstrap core JS-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Core theme JS-->
+<script th:src="@{/goodsboard_view/js/scripts.js}"></script>
+
+<script th:inline="javascript">
+
+      var actionForm = $("form");
+
+    $(".removeBtn").click(function(){
+
+        if(!confirm("삭제하시겠습니까?")){
+            return ;
+        }
+
+        actionForm
+            .attr("action", "/remove")
+            .attr("method","post");
+
+        actionForm.submit();
+
+    });
+
+</script>
+
+<script th:inline="javascript">
+
+  $(document).ready(function(e){
+
+        var bno = [[${dto.bno}]];
+
+        <!-- 리뷰 작성 모달창 띄우기 ------------------------------------------------------------------------------------->
+        var reviewModal = $(".reviewModal");
+        var inputText = $("input[name='text']");
+
+        $(".addReviewBtn").click(function(){
+          inputText.val("");
+          $("#reviewer").val($("#userid").text());
+          $(".removeBtn, .modifyBtn").hide();
+          $(".reviewSaveBtn").show();
+
+          reviewModal.modal("show");
+        });
+        <!-- 리뷰 작성 모달창 띄우기 -->
+
+        <!-- 리뷰 등록 ------------------------------------------------------------------------------------------------->
+        $(".reviewSaveBtn").click(function(){
+
+        console.log($("#reviewer").val());
+
+          var data = {bno:bno, text:inputText.val(), writer:$("#reviewer").val()};
+          console.log(data);
+
+          $.ajax({
+            url: "/" + bno,
+            type: "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+            dataType: "text",
+            success: function(result){
+
+              getMovieReviews();
+            }
+          })
+          reviewModal.modal("hide");
+        });
+        <!-- 리뷰 등록 -->
+
+        <!-- 리뷰 목록 새로고침 ------------------------------------------------------------------------------------------>
+        function getMovieReviews(){
+
+          function formatTime(str){
+            var date = new Date(str);
+
+            return date.getFullYear() + '/' +
+              (date.getMonth() + 1) + '/' +
+              date.getDate() + ' ' +
+              date.getHours() + ':' +
+              date.getMinutes();
+          }
+
+          $.getJSON("/"+bno+"/all", function(arr){
+            var str = "";
+
+            $.each(arr, function(idx, review){
+
+              str += '  <div class="card-body" style="cursor: pointer;" data-rno='+review.rno+' data-writer='+review.writer+'';
+              str += '  <h4 class="card-title">작성자: '+review.writer+'</h4>';
+              str += '  <h5 class="card-title">'+review.text+'</h5>';
+              str += '  <hr>';
+              str += '  </div>';
+
+            });
+
+            $(".reviewList").html(str);
+          });
+        }
+
+        getMovieReviews();
+        <!-- 리뷰 목록 새로고침 -->
+
+        <!-- 특정 리뷰 선택하기 ----------------------------------------------------------------------------------------->
+        var rno;
+        var writer;
+
+        $(".reviewList").on("click", ".card-body", function(){
+
+          var targetReview = $(this);
+          rno = targetReview.data("rno");
+          writer = targetReview.data("writer");
+
+          $(".reviewSaveBtn").hide();
+
+          if([[${#authentication.principal.username}]] == writer){
+            $(".removeBtn, .modifyBtn").show();
+          } else {
+            $(".removeBtn, .modifyBtn").hide();
+          }
+
+          $("#reviewer").val(writer);
+          inputText.val(targetReview.find(".card-title").clone().children().remove().end().text());
+
+          $(".reviewModal").modal("show");
+        });
+        <!-- 특정 리뷰 선택하기 -->
+
+        <!-- 리뷰 수정 ------------------------------------------------------------------------------------------------->
+        $(".modifyBtn").on("click", function(){
+
+          var data = {rno:rno, bno:bno, text:inputText.val()};
+
+          $.ajax({
+            url: '/'+bno+"/"+rno,
+            type: "PUT",
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+            dataType: "text",
+            success: function(result){
+
+              getMovieReviews();
+            }
+          })
+          reviewModal.modal("hide");
+        });
+        <!-- 리뷰 수정 -->
+
+        <!-- 리뷰 삭제 ------------------------------------------------------------------------------------------------->
+        $(".removeBtn").on("click", function(){
+
+          var data = {rno:rno};
+
+          $.ajax({
+            url: "/"+bno+"/"+rno,
+            type: "DELETE",
+            contentType: "application/json; charset=utf-8",
+            dataType: "text",
+            success: function(result){
+
+              getMovieReviews();
+            }
+          })
+          reviewModal.modal("hide");
+        });
+        <!-- 리뷰 삭제 -->
+
+  });
+
+</script>
+</body>
+</html>
